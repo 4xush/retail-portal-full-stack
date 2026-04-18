@@ -60,7 +60,7 @@ export function PublicLayout() {
       </main>
       <CartDrawer />
       <footer className="mt-12 border-t bg-brand py-6 text-center text-sm text-white">
-        Retail Portal — hackathon demo
+        Retail Portal : E comm
       </footer>
     </div>
   );

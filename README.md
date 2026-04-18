@@ -1,4 +1,4 @@
-# Retail Portal — KFC-style food e-commerce (hackathon demo)
+# Retail Portal — KFC-style food e-commerce (local only)
 
 Full-stack TypeScript monorepo: **React 18 + Vite + Tailwind** (client) and **Express 5 + Mongoose** (server), **MongoDB** (local, MongoDB Compass compatible).
 

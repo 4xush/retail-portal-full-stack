@@ -1,4 +1,4 @@
-You are a senior full-stack engineer building a KFC-style retail food e-commerce portal for a local hackathon demo.
+You are a senior full-stack engineer building a KFC-style retail food e-commerce portal for a local local only.
 The entire app runs locally. Target: single `npm run dev` from project root starts everything.
 Stack is fully TypeScript — no plain JS files.
 
