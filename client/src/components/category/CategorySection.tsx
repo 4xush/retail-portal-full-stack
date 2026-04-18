@@ -43,7 +43,7 @@ export function CategorySection({
           <img src={resolveImageUrl(category.logo)} alt="" className="h-10 w-10 rounded-lg object-cover" />
         )}
         <h2 className="text-2xl font-bold text-neutral-900">{category.name}</h2>
-        <Link to={`/?category=${category.slug}`} className="ml-auto text-sm font-semibold text-brand">
+        <Link to={`/search?category=${category.slug}`} className="ml-auto text-sm font-semibold text-brand">
           View all →
         </Link>
       </div>
