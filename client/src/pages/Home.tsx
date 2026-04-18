@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { fetchCategories } from '../api/categories.api';
+import { fetchProductById } from '../api/products.api';
 import type { Product } from '../types';
 import { CategoryTabBar } from '../components/category/CategoryTabBar';
 import { CategorySection } from '../components/category/CategorySection';
@@ -20,10 +21,12 @@ export function Home() {
     document.getElementById(`cat-${slug}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
-  const handleAdd = (p: Product) => {
+  const handleAdd = async (p: Product) => {
     const id = String(p._id ?? p.id);
     if ((p.addOns?.length ?? 0) > 0) {
-      setAddonTarget(p);
+      // List endpoint only returns addOn ObjectIds — fetch full product to get populated addOns
+      const full = await fetchProductById(id);
+      setAddonTarget(full);
       return;
     }
     addItem(
@@ -63,7 +66,7 @@ export function Home() {
             key={c.slug}
             category={c}
             onProductOpen={(p) => setDetail(p)}
-            onProductAdd={handleAdd}
+            onProductAdd={(p) => void handleAdd(p)}
           />
         ))}
       </div>

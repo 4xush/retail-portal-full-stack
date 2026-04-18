@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useInfiniteSearch } from '../hooks/useInfiniteProducts';
 import { fetchCategories } from '../api/categories.api';
+import { fetchProductById } from '../api/products.api';
 import { useQuery } from '@tanstack/react-query';
 import type { Product } from '../types';
 import { ProductCard } from '../components/product/ProductCard';
@@ -62,10 +63,12 @@ export function SearchPage() {
               key={String(p._id ?? p.id)}
               product={p}
               onOpen={() => setDetail(p)}
-              onAdd={() => {
+              onAdd={() => void (async () => {
                 const id = String(p._id ?? p.id);
-                if ((p.addOns?.length ?? 0) > 0) setAddon(p);
-                else {
+                if ((p.addOns?.length ?? 0) > 0) {
+                  const full = await fetchProductById(id);
+                  setAddon(full);
+                } else {
                   addItem(
                     { id, title: p.title, images: p.images, cost: p.cost, taxPercent: p.taxPercent },
                     1,
@@ -73,7 +76,7 @@ export function SearchPage() {
                   );
                   useCartStore.getState().setDrawerOpen(true);
                 }
-              }}
+              })()}
             />
           ))}
         </div>

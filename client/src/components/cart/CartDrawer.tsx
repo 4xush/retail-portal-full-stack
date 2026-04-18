@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { CartItemRow } from './CartItem';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { placeOrder } from '../../api/orders.api';
 import { Toast } from '../ui/Toast';
+import { OrderConfirmation } from '../order/OrderConfirmation';
+import type { Order } from '../../types';
 
 export function CartDrawer() {
-  const nav = useNavigate();
   const open = useCartStore((s) => s.drawerOpen);
   const setOpen = useCartStore((s) => s.setDrawerOpen);
   const items = useCartStore((s) => s.items);
@@ -20,6 +20,7 @@ export function CartDrawer() {
   const [appliedCode, setAppliedCode] = useState<string | undefined>();
   const [toast, setToast] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
 
   const subtotalPreTax = items.reduce((s, i) => s + i.cost * i.qty + i.addOns.reduce((a, x) => a + x.cost * i.qty, 0), 0);
   const tax = items.reduce(
@@ -33,22 +34,22 @@ export function CartDrawer() {
 
   const applyCode = () => {
     setAppliedCode(code.trim() || undefined);
-    setToast('Code will be applied at checkout');
+    setToast('Discount code will be applied at checkout');
     setTimeout(() => setToast(''), 2000);
   };
 
   const checkout = async () => {
     setSubmitting(true);
     try {
-      await placeOrder({
+      const result = await placeOrder({
         items: items.map((i) => ({ productId: i.productId, qty: i.qty })),
         discountCode: appliedCode,
       });
       clearCart();
       setOpen(false);
-      nav('/orders');
+      setConfirmedOrder(result.data as Order);
     } catch {
-      setToast('Order failed');
+      setToast('Order failed — please try again');
       setTimeout(() => setToast(''), 2500);
     } finally {
       setSubmitting(false);
@@ -58,6 +59,15 @@ export function CartDrawer() {
   return (
     <>
       <Toast message={toast} open={!!toast} />
+
+      {/* Order placed confirmation */}
+      <OrderConfirmation
+        open={!!confirmedOrder}
+        order={confirmedOrder}
+        onClose={() => setConfirmedOrder(null)}
+      />
+
+      {/* Backdrop */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -69,6 +79,8 @@ export function CartDrawer() {
           />
         )}
       </AnimatePresence>
+
+      {/* Drawer */}
       <AnimatePresence>
         {open && (
           <motion.aside
@@ -86,7 +98,7 @@ export function CartDrawer() {
             </div>
             <div className="flex-1 overflow-y-auto px-4">
               {items.length === 0 ? (
-                <p className="py-8 text-center text-neutral-500">Cart is empty</p>
+                <p className="py-8 text-center text-neutral-500">Your cart is empty</p>
               ) : (
                 items.map((i) => (
                   <CartItemRow
@@ -122,13 +134,16 @@ export function CartDrawer() {
                   Apply
                 </button>
               </div>
+              {appliedCode && (
+                <p className="text-xs font-medium text-green-600">Code "{appliedCode}" applied ✓</p>
+              )}
               <button
                 type="button"
                 disabled={items.length === 0 || submitting}
                 onClick={() => void checkout()}
                 className="mt-2 w-full rounded-xl bg-brand py-3 font-semibold text-white disabled:opacity-50"
               >
-                {submitting ? 'Placing…' : 'Place order'}
+                {submitting ? 'Placing order…' : 'Place order'}
               </button>
             </div>
           </motion.aside>
