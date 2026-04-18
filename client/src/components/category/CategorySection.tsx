@@ -35,7 +35,7 @@ export function CategorySection({
   const hasMore = items.length < total;
 
   return (
-    <section id={`cat-${category.slug}`} className="scroll-mt-[65px] py-8">
+    <section id={`cat-${category.slug}`} className="scroll-mt-0 py-8">
       {/* Section heading */}
       <div className="mb-5 flex items-center gap-3 border-b border-neutral-100 pb-4">
         {category.logo && (

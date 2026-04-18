@@ -11,7 +11,7 @@ export function CategorySidebar({
   onSelect: (slug: string) => void;
 }) {
   return (
-    <aside className="hidden md:flex w-56 shrink-0 flex-col sticky top-[65px] self-start h-[calc(100vh-65px)] overflow-y-auto border-r border-neutral-100 bg-white">
+    <aside className="hidden md:flex w-56 shrink-0 flex-col h-full overflow-y-auto border-r border-neutral-100 bg-white">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-neutral-100 px-4 py-4">
         <div className="flex items-end gap-0.5">

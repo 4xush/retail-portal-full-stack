@@ -72,10 +72,21 @@ export function Home() {
   };
 
   return (
-    <div>
-      {/* Hero banner */}
-      <div className="bg-gradient-to-r from-brand to-red-700 px-6 py-10 text-white">
-        <div className="mx-auto max-w-7xl">
+    /* Full-height app shell: sidebar fixed, only right column scrolls */
+    <div className="flex h-full overflow-hidden">
+
+      {/* ── Left sidebar (desktop only) ── */}
+      <CategorySidebar
+        categories={categories}
+        activeSlug={activeSlug}
+        onSelect={scrollTo}
+      />
+
+      {/* ── Right scrollable column ── */}
+      <div className="min-w-0 flex-1 overflow-y-auto">
+
+        {/* Hero banner */}
+        <div className="bg-gradient-to-r from-brand to-red-700 px-6 py-10 text-white">
           <h1 className="text-3xl font-black sm:text-4xl">Finger-lickin&apos; good deals</h1>
           <p className="mt-2 max-w-xl text-sm text-red-100">
             Order hot meals, combos, and sides — fast checkout, live stock, and crisp UI.
@@ -88,38 +99,28 @@ export function Home() {
             Browse menu
           </button>
         </div>
-      </div>
 
-      {/* Mobile category pills — only visible below md */}
-      {!isLoading && categories.length > 0 && (
-        <div className="sticky top-[65px] z-40 border-b border-neutral-100 bg-white/95 backdrop-blur md:hidden">
-          <div className="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-hide">
-            {categories.map((c) => (
-              <button
-                key={c.slug}
-                type="button"
-                onClick={() => scrollTo(c.slug)}
-                className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors
-                  ${activeSlug === c.slug ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-700'}`}
-              >
-                {c.name}
-              </button>
-            ))}
+        {/* Mobile category pills — sticky inside the scroll column */}
+        {!isLoading && categories.length > 0 && (
+          <div className="sticky top-0 z-40 border-b border-neutral-100 bg-white/95 backdrop-blur md:hidden">
+            <div className="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-hide">
+              {categories.map((c) => (
+                <button
+                  key={c.slug}
+                  type="button"
+                  onClick={() => scrollTo(c.slug)}
+                  className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors
+                    ${activeSlug === c.slug ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-700'}`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Two-column layout */}
-      <div className="mx-auto flex max-w-7xl">
-        {/* Left sidebar — desktop only */}
-        <CategorySidebar
-          categories={categories}
-          activeSlug={activeSlug}
-          onSelect={scrollTo}
-        />
-
-        {/* Main content */}
-        <div className="min-w-0 flex-1 px-6 py-4">
+        {/* Category sections */}
+        <div className="px-6 py-4">
           {isLoading && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (

@@ -9,9 +9,9 @@ export function PublicLayout() {
   const { user, isAuthenticated, clearAuth } = useAuth();
 
   return (
-    <div className="min-h-screen bg-offwhite">
-      <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3">
+    <div className="flex h-screen flex-col overflow-hidden bg-offwhite">
+      <header className="shrink-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
           <Link to="/" className="text-xl font-black tracking-tight text-brand">
             Retail<span className="text-neutral-900">Portal</span>
           </Link>
@@ -55,13 +55,10 @@ export function PublicLayout() {
         </div>
       </header>
       <Breadcrumb />
-      <main>
+      <main className="min-h-0 flex-1 overflow-hidden">
         <Outlet />
       </main>
       <CartDrawer />
-      <footer className="mt-12 border-t bg-brand py-6 text-center text-sm text-white">
-        Retail Portal : E comm
-      </footer>
     </div>
   );
 }
