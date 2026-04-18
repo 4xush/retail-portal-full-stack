@@ -34,7 +34,7 @@ export function CartDrawer() {
 
   const applyCode = () => {
     setAppliedCode(code.trim() || undefined);
-    setToast('Discount code will be applied at checkout');
+    setToast('Discount code applied!');
     setTimeout(() => setToast(''), 2000);
   };
 

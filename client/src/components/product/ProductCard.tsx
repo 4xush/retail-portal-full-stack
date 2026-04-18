@@ -17,7 +17,7 @@ export function ProductCard({
   const addOnCount = product.addOns?.length ?? 0;
 
   return (
-    <div className="group w-44 shrink-0 rounded-2xl border border-neutral-100 bg-white p-2 shadow-sm transition-transform hover:scale-105 sm:w-52">
+    <div className="group w-full rounded-2xl border border-neutral-100 bg-white p-2 shadow-sm transition-transform hover:scale-[1.02]">
       <button type="button" onClick={onOpen} className="block w-full text-left">
         <div className="relative aspect-square overflow-hidden rounded-xl bg-neutral-100">
           <img

@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import type { Category, Product } from '../../types';
 import { fetchProducts } from '../../api/products.api';
@@ -20,45 +19,55 @@ export function CategorySection({
     queryKey: ['products', category.slug],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
-      const res = await fetchProducts({ category: category.slug, page: pageParam as number, limit: 8 });
+      const res = await fetchProducts({ category: category.slug, page: pageParam as number, limit: 12 });
       return res;
     },
     getNextPageParam: (last) => {
       const total = last.meta?.total ?? 0;
-      const limit = last.meta?.limit ?? 8;
+      const limit = last.meta?.limit ?? 12;
       const page = last.meta?.page ?? 1;
       return page * limit < total ? page + 1 : undefined;
     },
   });
 
-  const items =
-    q.data?.pages.flatMap((p) => (p.data as Product[]) ?? []) ?? [];
+  const items = q.data?.pages.flatMap((p) => (p.data as Product[]) ?? []) ?? [];
   const total = q.data?.pages[0]?.meta?.total ?? 0;
   const hasMore = items.length < total;
 
   return (
-    <section id={`cat-${category.slug}`} className="scroll-mt-32 px-4 py-6">
-      <div className="mx-auto flex max-w-6xl items-center gap-3">
+    <section id={`cat-${category.slug}`} className="scroll-mt-[65px] py-8">
+      {/* Section heading */}
+      <div className="mb-5 flex items-center gap-3 border-b border-neutral-100 pb-4">
         {category.logo && (
-          <img src={resolveImageUrl(category.logo)} alt="" className="h-10 w-10 rounded-lg object-cover" />
+          <img
+            src={resolveImageUrl(category.logo)}
+            alt=""
+            className="h-10 w-10 rounded-xl object-cover ring-1 ring-neutral-100"
+          />
         )}
-        <h2 className="text-2xl font-bold text-neutral-900">{category.name}</h2>
-        <Link to={`/search?category=${category.slug}`} className="ml-auto text-sm font-semibold text-brand">
-          View all →
-        </Link>
+        <div>
+          <h2 className="text-xl font-black text-neutral-900">{category.name}</h2>
+          {total > 0 && (
+            <p className="text-xs text-neutral-400">{total} item{total !== 1 ? 's' : ''}</p>
+          )}
+        </div>
       </div>
-      <div className="mx-auto mt-4 flex max-w-6xl snap-x gap-3 overflow-x-auto pb-2">
+
+      {/* Grid */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {q.isLoading
-          ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+          ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
           : items.map((p) => (
-              <div key={String(p._id ?? p.id)} className="snap-start">
-                <ProductCard product={p} onOpen={() => onProductOpen(p)} onAdd={() => onProductAdd(p)} />
-              </div>
+              <ProductCard
+                key={String(p._id ?? p.id)}
+                product={p}
+                onOpen={() => onProductOpen(p)}
+                onAdd={() => onProductAdd(p)}
+              />
             ))}
       </div>
-      <div className="mx-auto max-w-6xl">
-        <LoadMore hasMore={hasMore} loading={q.isFetchingNextPage} onClick={() => void q.fetchNextPage()} />
-      </div>
+
+      <LoadMore hasMore={hasMore} loading={q.isFetchingNextPage} onClick={() => void q.fetchNextPage()} />
     </section>
   );
 }
