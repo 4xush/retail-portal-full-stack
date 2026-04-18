@@ -1,0 +1,591 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 0 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; }
+.tab { padding: 6px 14px; font-size: 13px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; transition: all .15s; }
+.tab.active { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; font-weight: 500; }
+.tab:hover:not(.active) { background: var(--color-background-secondary); }
+.panel { display: none; }
+.panel.active { display: block; }
+h2 { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin-bottom: .75rem; }
+h3 { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin: 1rem 0 .5rem; }
+p, li { font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; }
+ul { padding-left: 1.25rem; }
+.card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem; margin-bottom: .75rem; }
+.card.accent { border-left: 3px solid var(--color-background-info); background: var(--color-background-info); }
+.card.warn { border-left: 3px solid var(--color-background-warning); background: var(--color-background-warning); }
+.card.danger { border-left: 3px solid var(--color-background-danger); background: var(--color-background-danger); }
+.card.success { border-left: 3px solid var(--color-background-success); background: var(--color-background-success); }
+.card p, .card li { color: var(--color-text-primary); }
+.card h3 { color: var(--color-text-primary); margin-top: 0; }
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; margin-right: 4px; margin-bottom: 4px; }
+.b-blue { background: var(--color-background-info); color: var(--color-text-info); }
+.b-green { background: var(--color-background-success); color: var(--color-text-success); }
+.b-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+.b-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+.b-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary); }
+.arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+.arch-box { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: .75rem; }
+.arch-box .label { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .25rem; }
+.arch-box .val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.arch-box ul { padding-left: 1rem; margin-top: .35rem; }
+.arch-box li { font-size: 12px; }
+.flow-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: .75rem; }
+.step-num { min-width: 24px; height: 24px; border-radius: 50%; background: var(--color-background-info); color: var(--color-text-info); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-body { flex: 1; }
+.step-body strong { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.step-body p { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.api-row { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); margin-bottom: 6px; overflow: hidden; }
+.api-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; background: var(--color-background-primary); }
+.api-header:hover { background: var(--color-background-secondary); }
+.method { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 4px; min-width: 40px; text-align: center; }
+.m-get { background: #EAF3DE; color: #3B6D11; }
+.m-post { background: #E6F1FB; color: #185FA5; }
+.m-put { background: #FAEEDA; color: #854F0B; }
+.m-delete { background: #FCEBEB; color: #A32D2D; }
+.m-patch { background: #FBEAF0; color: #993556; }
+.api-path { font-size: 13px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); }
+.api-desc { font-size: 12px; color: var(--color-text-secondary); margin-left: auto; }
+.api-body { display: none; padding: 10px 14px; background: var(--color-background-secondary); border-top: 0.5px solid var(--color-border-tertiary); font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; }
+.api-body.open { display: block; }
+.schema-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.schema-table th { text-align: left; font-weight: 500; font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.schema-table td { padding: 6px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); vertical-align: top; }
+.schema-table tr:last-child td { border-bottom: none; }
+.mono { font-family: var(--font-mono); color: var(--color-text-info); font-size: 11px; }
+.day-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); margin-bottom: .75rem; overflow: hidden; }
+.day-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+.day-num { font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 10px; }
+.day-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.day-body { padding: 10px 14px 12px; background: var(--color-background-secondary); }
+.day-body li { font-size: 12px; margin-bottom: 3px; }
+.tip { display: flex; gap: 8px; align-items: flex-start; margin-bottom: .5rem; }
+.tip-icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.tip p { font-size: 13px; }
+</style>
+
+<h2 style="sr-only">Retail portal full-stack design reference</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('arch')">Architecture</button>
+  <button class="tab" onclick="show('data')">Data flows</button>
+  <button class="tab" onclick="show('schema')">DB schema</button>
+  <button class="tab" onclick="show('api')">API design</button>
+  <button class="tab" onclick="show('stack')">Tech stack</button>
+  <button class="tab" onclick="show('plan')">Execution plan</button>
+  <button class="tab" onclick="show('pitfalls')">Pitfalls & bonuses</button>
+</div>
+
+<!-- ARCHITECTURE -->
+<div id="arch" class="panel active">
+  <h2>System architecture</h2>
+  <div class="card accent">
+    <h3>Recommended approach: Modular monolith → easy microservice extraction later</h3>
+    <p>For a 2–4 day hackathon, a clean monolith with well-separated modules beats premature microservices. Use folder-based separation so any module can be extracted later without rewriting the API contracts.</p>
+  </div>
+
+  <h3>Layer breakdown</h3>
+  <div class="arch-grid">
+    <div class="arch-box">
+      <div class="label">Frontend</div>
+      <div class="val">React SPA</div>
+      <ul>
+        <li>React + Vite</li>
+        <li>React Router v6</li>
+        <li>Zustand (state)</li>
+        <li>React Query (server state)</li>
+        <li>Tailwind CSS</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Backend</div>
+      <div class="val">Node + Express</div>
+      <ul>
+        <li>Express.js</li>
+        <li>Mongoose ORM</li>
+        <li>JWT + API Key auth</li>
+        <li>Multer (uploads)</li>
+        <li>express-validator</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Database</div>
+      <div class="val">MongoDB</div>
+      <ul>
+        <li>Atlas (cloud)</li>
+        <li>Text indexes</li>
+        <li>Aggregation pipeline</li>
+        <li>TTL indexes</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Infra</div>
+      <div class="val">Cloud deploy</div>
+      <ul>
+        <li>Render / Railway</li>
+        <li>Cloudinary (images)</li>
+        <li>GitHub Actions CI/CD</li>
+        <li>dotenv config</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>High-level request flow</h3>
+  <div class="flow-step"><div class="step-num">1</div><div class="step-body"><strong>Browser → React SPA</strong><p>User interacts → React Query fires API call with JWT in Authorization header</p></div></div>
+  <div class="flow-step"><div class="step-num">2</div><div class="step-body"><strong>Express router</strong><p>auth middleware validates JWT / API key → attaches req.user with role</p></div></div>
+  <div class="flow-step"><div class="step-num">3</div><div class="step-body"><strong>Route → Controller → Service</strong><p>Controllers are thin (parse req, call service, return res). All business logic lives in services.</p></div></div>
+  <div class="flow-step"><div class="step-num">4</div><div class="step-body"><strong>Service → Mongoose → MongoDB</strong><p>Service layer calls Mongoose models. Aggregation pipelines handle complex queries (combos, order history with product data).</p></div></div>
+  <div class="flow-step"><div class="step-num">5</div><div class="step-body"><strong>Response → React Query cache</strong><p>Successful response updates client cache. Stale-while-revalidate for product listings.</p></div></div>
+
+  <h3>Role-based access model</h3>
+  <div class="arch-grid">
+    <div class="arch-box">
+      <div class="label">Guest</div>
+      <ul>
+        <li>Browse products</li>
+        <li>Search</li>
+        <li>View categories</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">User (JWT)</div>
+      <ul>
+        <li>Cart management</li>
+        <li>Place orders</li>
+        <li>Order history</li>
+        <li>Re-order</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Admin (JWT + role)</div>
+      <ul>
+        <li>Create/edit products</li>
+        <li>Manage categories</li>
+        <li>Update stock</li>
+        <li>View all orders</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Trade-off notes</h3>
+  <div class="card warn">
+    <h3>NoSQL (MongoDB) vs SQL</h3>
+    <p>MongoDB wins here: product catalog with variable fields (combos, add-ons, tax%), nested category trees, and flexible order snapshots all map naturally to documents. Use SQL if you're more comfortable with it — the eval rarely cares which you pick as long as you can explain why.</p>
+  </div>
+</div>
+
+<!-- DATA FLOWS -->
+<div id="data" class="panel">
+  <h2>Data flows for key features</h2>
+
+  <h3>Auth flow (signup / login)</h3>
+  <div class="flow-step"><div class="step-num">1</div><div class="step-body"><strong>POST /api/auth/signup</strong><p>Validate email uniqueness → bcrypt hash password (rounds: 12) → save User doc → return JWT + refresh token</p></div></div>
+  <div class="flow-step"><div class="step-num">2</div><div class="step-body"><strong>POST /api/auth/login</strong><p>Find user by email → bcrypt.compare → sign JWT (15m expiry) + refresh token (7d, stored in httpOnly cookie) → return access token in body</p></div></div>
+  <div class="flow-step"><div class="step-num">3</div><div class="step-body"><strong>Every protected request</strong><p>Authorization: Bearer {token} → middleware verifies signature + expiry → req.user = decoded payload</p></div></div>
+  <div class="flow-step"><div class="step-num">4</div><div class="step-body"><strong>Token refresh</strong><p>POST /api/auth/refresh → read httpOnly cookie → verify refresh token → issue new access token</p></div></div>
+  <div class="card accent">
+    <p><strong>API Key flow:</strong> Admin can generate API keys (stored hashed in DB). Keys are passed as X-API-Key header. Middleware checks this before JWT. Useful for Postman demo.</p>
+  </div>
+
+  <h3>Product listing & fuzzy search</h3>
+  <div class="flow-step"><div class="step-num">1</div><div class="step-body"><strong>Home page load</strong><p>GET /api/categories?include=products&limit=8 — returns categories each with top N products (aggregation $lookup). Lazy load more per category on scroll.</p></div></div>
+  <div class="flow-step"><div class="step-num">2</div><div class="step-body"><strong>Fuzzy search</strong><p>MongoDB text index on {name, description, tags}. Query: db.products.find({$text:{$search: q}, score: {$meta: 'textScore'}}).sort({score}). For better fuzzy matching, add a simple regex fallback: /query/i on name field.</p></div></div>
+  <div class="flow-step"><div class="step-num">3</div><div class="step-body"><strong>Pagination</strong><p>Cursor-based for infinite scroll (lastId param). Offset-based for admin tables (page + limit params). Never load all records — default limit: 20.</p></div></div>
+  <div class="flow-step"><div class="step-num">4</div><div class="step-body"><strong>Category filter</strong><p>GET /api/products?category=cat_id&page=1&limit=20. Category ID indexed in products collection.</p></div></div>
+
+  <h3>Cart / combos / add-ons</h3>
+  <div class="flow-step"><div class="step-num">1</div><div class="step-body"><strong>Cart stored in DB (not just localStorage)</strong><p>One Cart doc per user. CartItem embeds productId, qty, selectedAddOns[], selectedComboId, snapshotPrice (price at time of add).</p></div></div>
+  <div class="flow-step"><div class="step-num">2</div><div class="step-body"><strong>Combo logic</strong><p>ComboGroup doc: {name, products: [{productId, qty}], discountType: 'percent'|'flat', discountValue}. When user selects combo, frontend sends comboId; backend re-validates combo price server-side before order creation.</p></div></div>
+  <div class="flow-step"><div class="step-num">3</div><div class="step-body"><strong>Add-ons</strong><p>Product schema has addOns: [{name, price, required: bool}]. Frontend renders add-on selector. Add-on selections stored in cart item.</p></div></div>
+  <div class="flow-step"><div class="step-num">4</div><div class="step-body"><strong>Price calculation</strong><p>Always recalculate total on backend at checkout. Never trust client-sent price. Formula: (basePrice + addOnTotal) × qty × (1 + taxRate) × (1 - discountRate).</p></div></div>
+  <div class="card danger">
+    <p><strong>Critical edge case:</strong> Product price or stock changes after item added to cart. Snapshot the price at add-to-cart time. At checkout, warn user if price changed and require confirmation. Deduct stock atomically with findOneAndUpdate + $inc:{stock: -qty} + check stock ≥ 0 in query filter.</p>
+  </div>
+
+  <h3>Order history & re-ordering</h3>
+  <div class="flow-step"><div class="step-num">1</div><div class="step-body"><strong>Order creation</strong><p>Atomic: decrement stock for all items → create Order doc with full product snapshot (name, price, image at time of order) → clear cart. If any stock check fails, rollback with session transactions.</p></div></div>
+  <div class="flow-step"><div class="step-num">2</div><div class="step-body"><strong>Order history page</strong><p>GET /api/orders?page=1&limit=10. Returns orders sorted by createdAt desc. Each order embeds product snapshot so history is accurate even if product is deleted later.</p></div></div>
+  <div class="flow-step"><div class="step-num">3</div><div class="step-body"><strong>Re-order flow</strong><p>POST /api/orders/:id/reorder → fetch original order → for each item, check current stock & price → add to cart (with updated prices, flagging changes) → redirect to cart.</p></div></div>
+</div>
+
+<!-- DB SCHEMA -->
+<div id="schema" class="panel">
+  <h2>Database schema</h2>
+
+  <h3>Users collection</h3>
+  <table class="schema-table">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td class="mono">_id</td><td>ObjectId</td><td>Auto-generated</td></tr>
+    <tr><td class="mono">name</td><td>String</td><td>required, trim</td></tr>
+    <tr><td class="mono">email</td><td>String</td><td>unique, lowercase, indexed</td></tr>
+    <tr><td class="mono">passwordHash</td><td>String</td><td>bcrypt, never returned in API</td></tr>
+    <tr><td class="mono">role</td><td>String</td><td>enum: ['user', 'admin']</td></tr>
+    <tr><td class="mono">apiKey</td><td>String</td><td>hashed, sparse index</td></tr>
+    <tr><td class="mono">refreshTokens</td><td>String[]</td><td>array for multi-device</td></tr>
+    <tr><td class="mono">createdAt</td><td>Date</td><td>timestamps: true</td></tr>
+  </table>
+
+  <h3>Categories collection</h3>
+  <table class="schema-table">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td class="mono">_id</td><td>ObjectId</td><td></td></tr>
+    <tr><td class="mono">name</td><td>String</td><td>required, unique</td></tr>
+    <tr><td class="mono">slug</td><td>String</td><td>indexed, URL-friendly</td></tr>
+    <tr><td class="mono">logo</td><td>String</td><td>Cloudinary URL</td></tr>
+    <tr><td class="mono">description</td><td>String</td><td></td></tr>
+    <tr><td class="mono">isActive</td><td>Boolean</td><td>default: true, soft delete</td></tr>
+  </table>
+
+  <h3>Products collection</h3>
+  <table class="schema-table">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td class="mono">_id</td><td>ObjectId</td><td></td></tr>
+    <tr><td class="mono">title</td><td>String</td><td>required, text index</td></tr>
+    <tr><td class="mono">description</td><td>String</td><td>text index</td></tr>
+    <tr><td class="mono">tags</td><td>String[]</td><td>text index</td></tr>
+    <tr><td class="mono">images</td><td>String[]</td><td>Cloudinary URLs</td></tr>
+    <tr><td class="mono">categoryId</td><td>ObjectId ref</td><td>indexed</td></tr>
+    <tr><td class="mono">price</td><td>Number</td><td>base price in paise/cents</td></tr>
+    <tr><td class="mono">taxPercent</td><td>Number</td><td>e.g. 18 for 18%</td></tr>
+    <tr><td class="mono">stock</td><td>Number</td><td>indexed for low-stock query</td></tr>
+    <tr><td class="mono">addOns</td><td>Object[]</td><td>{name, price, required}</td></tr>
+    <tr><td class="mono">isAvailable</td><td>Boolean</td><td>admin toggle</td></tr>
+    <tr><td class="mono">discount</td><td>Object</td><td>{type, value, expiresAt}</td></tr>
+  </table>
+
+  <h3>Carts collection</h3>
+  <table class="schema-table">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td class="mono">userId</td><td>ObjectId ref</td><td>unique index — one cart per user</td></tr>
+    <tr><td class="mono">items</td><td>Object[]</td><td>{productId, qty, snapshotPrice, addOns[], comboId}</td></tr>
+    <tr><td class="mono">updatedAt</td><td>Date</td><td>TTL: auto-expire cart after 30 days</td></tr>
+  </table>
+
+  <h3>Orders collection</h3>
+  <table class="schema-table">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td class="mono">_id</td><td>ObjectId</td><td></td></tr>
+    <tr><td class="mono">userId</td><td>ObjectId ref</td><td>indexed</td></tr>
+    <tr><td class="mono">items</td><td>Object[]</td><td>FULL snapshot: {title, image, price, qty, addOns, comboName}</td></tr>
+    <tr><td class="mono">totals</td><td>Object</td><td>{subtotal, tax, discount, grandTotal}</td></tr>
+    <tr><td class="mono">status</td><td>String</td><td>enum: pending→confirmed→delivered→cancelled</td></tr>
+    <tr><td class="mono">createdAt</td><td>Date</td><td>indexed for history queries</td></tr>
+  </table>
+
+  <h3>Stock history collection</h3>
+  <table class="schema-table">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td class="mono">productId</td><td>ObjectId ref</td><td>indexed</td></tr>
+    <tr><td class="mono">delta</td><td>Number</td><td>+ve: restock, -ve: sold/adjust</td></tr>
+    <tr><td class="mono">reason</td><td>String</td><td>enum: sale, restock, adjustment</td></tr>
+    <tr><td class="mono">orderId</td><td>ObjectId</td><td>optional, for sale records</td></tr>
+    <tr><td class="mono">adminId</td><td>ObjectId</td><td>who made the change</td></tr>
+    <tr><td class="mono">createdAt</td><td>Date</td><td>TTL: keep 90 days</td></tr>
+  </table>
+
+  <div class="card accent">
+    <h3>Indexing strategy</h3>
+    <ul>
+      <li>Text index on products: {title, description, tags} — enables $text search</li>
+      <li>Compound index on products: {categoryId: 1, isAvailable: 1, createdAt: -1} — category page query</li>
+      <li>Index on orders: {userId: 1, createdAt: -1} — order history</li>
+      <li>Unique index on users.email — enforced at DB level</li>
+      <li>TTL index on carts.updatedAt: 30 days expiry</li>
+    </ul>
+  </div>
+</div>
+
+<!-- API DESIGN -->
+<div id="api" class="panel">
+  <h2>API design — click any row to expand</h2>
+  <p style="margin-bottom: 1rem;">Base path: <span class="mono" style="font-size: 13px;">/api/v1</span> &nbsp;|&nbsp; All responses: <span class="mono" style="font-size: 13px;">{ success, data, error, meta }</span></p>
+
+  <h3>Auth</h3>
+  <div id="apis"></div>
+</div>
+
+<!-- TECH STACK -->
+<div id="stack" class="panel">
+  <h2>Tech stack with justification</h2>
+  <div class="arch-grid">
+    <div class="arch-box">
+      <div class="label">Frontend</div>
+      <div class="val">React + Vite</div>
+      <ul>
+        <li>Fast HMR, SPA routing</li>
+        <li>Code splitting built-in</li>
+        <li>React Query: server state, caching, pagination</li>
+        <li>Zustand: cart, auth state (lighter than Redux)</li>
+        <li>Tailwind: rapid UI</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Backend</div>
+      <div class="val">Node + Express</div>
+      <ul>
+        <li>Same language FE/BE = faster dev</li>
+        <li>Mongoose: schema validation + rich query API</li>
+        <li>jsonwebtoken + bcryptjs</li>
+        <li>Multer + Cloudinary SDK</li>
+        <li>helmet + cors + rate-limit</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Database</div>
+      <div class="val">MongoDB Atlas</div>
+      <ul>
+        <li>Flexible schema for products</li>
+        <li>Built-in text search</li>
+        <li>Aggregation pipeline for combos</li>
+        <li>Free tier on Atlas</li>
+        <li>Atlas Search = Lucene fuzzy (bonus)</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Storage</div>
+      <div class="val">Cloudinary</div>
+      <ul>
+        <li>Free tier: 25GB</li>
+        <li>Auto image optimization</li>
+        <li>Signed uploads for security</li>
+        <li>CDN-backed URLs</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">Infra</div>
+      <div class="val">Render / Railway</div>
+      <ul>
+        <li>Free tier Node hosting</li>
+        <li>Auto-deploy from GitHub</li>
+        <li>Env vars via dashboard</li>
+        <li>Vercel for frontend (CDN)</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <div class="label">CI/CD</div>
+      <div class="val">GitHub Actions</div>
+      <ul>
+        <li>Lint + test on PR</li>
+        <li>Auto deploy on main push</li>
+        <li>Postman Newman for API tests</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>What to skip (avoid over-engineering)</h3>
+  <div class="card warn">
+    <ul>
+      <li>Redis caching — not needed at hackathon scale; React Query client cache is enough</li>
+      <li>Microservices — a clean monolith is faster to build and easier to demo</li>
+      <li>GraphQL — REST is simpler to Postman-test and explain</li>
+      <li>Message queues (RabbitMQ/Kafka) — not needed for sync order flow</li>
+      <li>Docker in CI — nice but burns time; simple npm test workflow is fine</li>
+    </ul>
+  </div>
+</div>
+
+<!-- EXECUTION PLAN -->
+<div id="plan" class="panel">
+  <h2>Execution plan (4-day hackathon)</h2>
+  <div class="card accent">
+    <p><strong>Rule:</strong> Get a working vertical slice by end of Day 1. Every subsequent day adds features on top of a working base. Never refactor on Day 3.</p>
+  </div>
+
+  <div class="day-card">
+    <div class="day-header" style="background: var(--color-background-info);">
+      <span class="day-num" style="background:#185FA5; color:#fff;">Day 1</span>
+      <span class="day-title">Foundation — auth, DB, scaffold</span>
+    </div>
+    <div class="day-body">
+      <ul>
+        <li>✅ Initialize monorepo (client/ + server/), commit to GitHub</li>
+        <li>✅ MongoDB Atlas setup, Mongoose connection, env config</li>
+        <li>✅ Auth routes: signup, login, JWT middleware, role guard</li>
+        <li>✅ User + Category + Product models with indexes</li>
+        <li>✅ Seed script: 3 categories, 10 products each</li>
+        <li>✅ React scaffold: router, auth context, protected routes, Tailwind</li>
+        <li>✅ Login/Signup pages working end-to-end</li>
+        <li>✅ Postman collection: auth endpoints</li>
+        <li>✅ GitHub Actions: lint workflow</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-header" style="background: var(--color-background-success);">
+      <span class="day-num" style="background:#3B6D11; color:#fff;">Day 2</span>
+      <span class="day-title">Core features — products, cart, search</span>
+    </div>
+    <div class="day-body">
+      <ul>
+        <li>✅ Product CRUD API (admin) + image upload via Cloudinary</li>
+        <li>✅ Category API with product listing (aggregation)</li>
+        <li>✅ Home page: KFC-style category sections with product cards</li>
+        <li>✅ Fuzzy search API + search bar with debounce</li>
+        <li>✅ Cart API (add, remove, update qty)</li>
+        <li>✅ Cart UI (slide-out drawer with totals)</li>
+        <li>✅ Admin: product list with pagination</li>
+        <li>✅ Postman: product + cart endpoints</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-header" style="background: var(--color-background-warning);">
+      <span class="day-num" style="background:#854F0B; color:#fff;">Day 3</span>
+      <span class="day-title">Shopping features — orders, combos, history</span>
+    </div>
+    <div class="day-body">
+      <ul>
+        <li>✅ Order placement API (atomic stock deduction)</li>
+        <li>✅ Order history page + re-order button</li>
+        <li>✅ Add-ons UI on product detail modal</li>
+        <li>✅ Combo groups: model + API + frontend selector</li>
+        <li>✅ Discount logic (percent/flat) in price calculation</li>
+        <li>✅ Admin: stock update UI + stock history table</li>
+        <li>✅ Lazy loading ("load more") on home page</li>
+        <li>✅ Postman: order endpoints + error scenarios</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-header" style="background: var(--color-background-danger);">
+      <span class="day-num" style="background:#A32D2D; color:#fff;">Day 4</span>
+      <span class="day-title">Polish, deploy, document</span>
+    </div>
+    <div class="day-body">
+      <ul>
+        <li>✅ Deploy backend to Render, frontend to Vercel</li>
+        <li>✅ GitHub Actions: auto-deploy workflow</li>
+        <li>✅ Breadcrumb navigation, error boundaries, loading skeletons</li>
+        <li>✅ 404 / error pages, form validation messages</li>
+        <li>✅ README: setup, API docs link, env vars, screenshots</li>
+        <li>✅ Postman collection export + public workspace link</li>
+        <li>✅ Final Postman run showing all status codes (200, 201, 400, 401, 403, 404, 409, 422, 500)</li>
+        <li>⭐ Bonus: Atlas Search for better fuzzy matching</li>
+        <li>⭐ Bonus: order status email (Nodemailer)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Priority vs optional features</h3>
+  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: .5rem;">
+    <span class="badge b-red">P0: Auth</span>
+    <span class="badge b-red">P0: Product CRUD</span>
+    <span class="badge b-red">P0: Cart</span>
+    <span class="badge b-red">P0: Order placement</span>
+    <span class="badge b-blue">P1: Fuzzy search</span>
+    <span class="badge b-blue">P1: Order history</span>
+    <span class="badge b-blue">P1: Stock update</span>
+    <span class="badge b-blue">P1: Image upload</span>
+    <span class="badge b-amber">P2: Combos/Add-ons</span>
+    <span class="badge b-amber">P2: Discounts</span>
+    <span class="badge b-amber">P2: Re-order</span>
+    <span class="badge b-amber">P2: Pagination</span>
+    <span class="badge b-green">Bonus: CI/CD deploy</span>
+    <span class="badge b-green">Bonus: Atlas Search</span>
+    <span class="badge b-green">Bonus: Email notif</span>
+  </div>
+</div>
+
+<!-- PITFALLS & BONUSES -->
+<div id="pitfalls" class="panel">
+  <h2>Common mistakes & bonus impressors</h2>
+
+  <h3>Mistakes candidates make</h3>
+  <div class="tip"><div class="tip-icon">🔴</div><p><strong>Trusting client-sent prices.</strong> Always recalculate totals server-side at checkout. Evaluators test this by modifying the request.</p></div>
+  <div class="tip"><div class="tip-icon">🔴</div><p><strong>Not handling race conditions on stock.</strong> Two users buying the last item simultaneously. Use atomic findOneAndUpdate with stock check in the filter, not in application code.</p></div>
+  <div class="tip"><div class="tip-icon">🔴</div><p><strong>Returning passwordHash in API responses.</strong> Always use .select('-passwordHash') or transform via toJSON. Evaluators check this in network tab.</p></div>
+  <div class="tip"><div class="tip-icon">🔴</div><p><strong>No error handling middleware.</strong> Unhandled promise rejections crash the server. Add a global Express error handler and async wrapper utility.</p></div>
+  <div class="tip"><div class="tip-icon">🔴</div><p><strong>Storing full product data in order items by reference.</strong> If product is deleted/edited, order history breaks. Always snapshot title, price, image into the order document.</p></div>
+  <div class="tip"><div class="tip-icon">🟡</div><p><strong>No input validation.</strong> Use express-validator or Zod on every endpoint. Evaluators send malformed requests.</p></div>
+  <div class="tip"><div class="tip-icon">🟡</div><p><strong>Committing .env files.</strong> Use .env.example with placeholder values. Real secrets in .env (gitignored). Your GitHub Actions should use repo secrets.</p></div>
+  <div class="tip"><div class="tip-icon">🟡</div><p><strong>N+1 query in product listing.</strong> Don't fetch category then loop products per category. Use $lookup aggregation in a single query.</p></div>
+  <div class="tip"><div class="tip-icon">🟡</div><p><strong>No pagination defaults.</strong> Always enforce max limit (e.g. 100) even if client sends limit=99999.</p></div>
+  <div class="tip"><div class="tip-icon">🟡</div><p><strong>Admin routes with no role check.</strong> JWT alone doesn't mean admin. Middleware must check req.user.role === 'admin'.</p></div>
+
+  <h3>Bonus features that impress</h3>
+  <div class="card success">
+    <ul>
+      <li><strong>MongoDB Atlas Search</strong> — upgrade fuzzy search to Lucene-powered full-text with typo tolerance. Takes ~30 mins.</li>
+      <li><strong>Postman Newman in CI</strong> — add a GitHub Actions step that runs your Postman collection against the staging API. Shows testing maturity.</li>
+      <li><strong>Optimistic UI updates</strong> — cart updates feel instant (React Query's optimisticUpdate). Shows frontend polish.</li>
+      <li><strong>Skeleton loaders</strong> — instead of spinners, show content-shaped loading states. Huge UX impression.</li>
+      <li><strong>Rate limiting</strong> — express-rate-limit on auth routes (5 req/min). Shows security awareness.</li>
+      <li><strong>Stock history audit log</strong> — every stock change tracked with who, when, why. Shows domain thinking.</li>
+      <li><strong>KFC-style sticky category navbar</strong> — as user scrolls, active category highlights. Classic e-com pattern.</li>
+      <li><strong>Swagger/OpenAPI docs</strong> — auto-generated from swagger-jsdoc. Evaluators can explore the API interactively.</li>
+    </ul>
+  </div>
+
+  <h3>Security checklist</h3>
+  <div class="card warn">
+    <ul>
+      <li>helmet() — sets secure HTTP headers</li>
+      <li>cors() — restrict origins to your frontend URL in production</li>
+      <li>express-rate-limit — auth endpoints especially</li>
+      <li>mongoSanitize — prevent NoSQL injection via user inputs</li>
+      <li>JWT in Authorization header (not localStorage for refresh token)</li>
+      <li>Signed Cloudinary upload URLs — never expose your API secret</li>
+      <li>HTTPS enforced in production (Render does this automatically)</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const apis = [
+  {m:'POST', p:'/auth/signup', d:'Register user', body:'Body: {name, email, password} → 201 {token, user} | 409 email exists | 422 validation fail'},
+  {m:'POST', p:'/auth/login', d:'Authenticate', body:'Body: {email, password} → 200 {accessToken, user} | 401 wrong credentials'},
+  {m:'POST', p:'/auth/refresh', d:'Refresh token', body:'Cookie: refreshToken → 200 {accessToken} | 401 invalid/expired'},
+  {m:'POST', p:'/auth/logout', d:'Invalidate tokens', body:'Clears refresh token from DB + cookie → 200'},
+  {m:'GET',  p:'/categories', d:'List all categories', body:'Query: ?page&limit → 200 {categories[], meta: {total, page}}'},
+  {m:'POST', p:'/categories', d:'Create category (admin)', body:'Body: {name, description} + logo file → 201 {category}'},
+  {m:'PUT',  p:'/categories/:id', d:'Update category (admin)', body:'Partial update → 200 {category} | 404 not found'},
+  {m:'GET',  p:'/products', d:'List products', body:'Query: ?category&search&page&limit&sortBy → 200 {products[], meta}'},
+  {m:'GET',  p:'/products/search', d:'Fuzzy search', body:'Query: ?q&category → 200 {products[], query, count}'},
+  {m:'GET',  p:'/products/:id', d:'Product detail', body:'200 {product, addOns, relatedCombos} | 404'},
+  {m:'POST', p:'/products', d:'Create product (admin)', body:'Body: {title, description, categoryId, price, taxPercent, stock, addOns[]} + images → 201'},
+  {m:'PUT',  p:'/products/:id', d:'Update product (admin)', body:'Partial update → 200 | 404'},
+  {m:'PATCH',p:'/products/:id/stock', d:'Update stock (admin)', body:'Body: {delta, reason} → 200 {newStock} — also creates stock history record'},
+  {m:'GET',  p:'/cart', d:'Get user cart', body:'Returns cart with populated product data → 200 {items[], totals}'},
+  {m:'POST', p:'/cart/items', d:'Add to cart', body:'Body: {productId, qty, addOns[], comboId?} → 200 {cart} | 409 out of stock'},
+  {m:'PUT',  p:'/cart/items/:productId', d:'Update qty', body:'Body: {qty} → 200 {cart} | 400 exceeds stock'},
+  {m:'DELETE',p:'/cart/items/:productId', d:'Remove from cart', body:'200 {cart}'},
+  {m:'DELETE',p:'/cart', d:'Clear cart', body:'200 {message}'},
+  {m:'POST', p:'/orders', d:'Place order', body:'Atomic: validate stock → create order → deduct stock → clear cart. 201 {order} | 409 stock changed'},
+  {m:'GET',  p:'/orders', d:'Order history', body:'Query: ?page&limit → 200 {orders[], meta}. Status filter optional.'},
+  {m:'GET',  p:'/orders/:id', d:'Order detail', body:'200 {order with snapshots} | 403 not owner | 404'},
+  {m:'POST', p:'/orders/:id/reorder', d:'Add past order to cart', body:'200 {cart, priceChanges[]} — flags items whose price changed'},
+  {m:'GET',  p:'/combos', d:'List combos', body:'200 {combos[]} — includes component products'},
+  {m:'POST', p:'/combos', d:'Create combo (admin)', body:'Body: {name, products:[{productId, qty}], discountType, discountValue} → 201'},
+];
+
+const container = document.getElementById('apis');
+let opened = null;
+apis.forEach((a, i) => {
+  const row = document.createElement('div');
+  row.className = 'api-row';
+  const mc = {GET:'m-get',POST:'m-post',PUT:'m-put',DELETE:'m-delete',PATCH:'m-patch'}[a.m]||'m-get';
+  row.innerHTML = `
+    <div class="api-header" onclick="toggleApi(${i})">
+      <span class="method ${mc}">${a.m}</span>
+      <span class="api-path">${a.p}</span>
+      <span class="api-desc">${a.d}</span>
+    </div>
+    <div class="api-body" id="ab${i}">${a.body}</div>`;
+  container.appendChild(row);
+});
+window.toggleApi = (i) => {
+  const el = document.getElementById('ab'+i);
+  el.classList.toggle('open');
+};
+
+window.show = (id) => {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+};
+</script>
