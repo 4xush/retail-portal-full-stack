@@ -2,6 +2,12 @@
 
 Full-stack TypeScript monorepo: **React 18 + Vite + Tailwind** (client) and **Express 5 + Mongoose** (server), **MongoDB** (local, MongoDB Compass compatible).
 
+**Repository:** [github.com/4xush/retail-portal-full-stack](https://github.com/4xush/retail-portal-full-stack)
+
+## Contributors & collaborators
+
+Development happens on GitHub with **multiple collaborators** on the repo above. For an up-to-date list of people who have contributed code, see [**Contributors**](https://github.com/4xush/retail-portal-full-stack/graphs/contributors). Collaborators with repository access are managed under the repository **Settings → Collaborators** (visible to maintainers).
+
 ## Prerequisites
 
 - Node.js **20+**
@@ -10,7 +16,12 @@ Full-stack TypeScript monorepo: **React 18 + Vite + Tailwind** (client) and **Ex
 
 ## Setup
 
-1. Clone the repository.
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/4xush/retail-portal-full-stack.git
+   cd retail-portal-full-stack
+   ```
 
 2. Copy environment file and set secrets (JWT values must be **at least 32 characters**):
 
