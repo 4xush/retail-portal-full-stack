@@ -7,3 +7,6 @@ server/src/uploads/*
 .DS_Store
 client/dist/
 server/dist/
+
+# Internal docs — not published with the app
+dev_docs/
