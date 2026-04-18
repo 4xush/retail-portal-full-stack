@@ -39,11 +39,11 @@ export function SearchPage() {
       : 'Browse menu';
 
   return (
-    <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
-      {/* Sidebar */}
-      <aside className="hidden w-56 shrink-0 space-y-3 md:block">
-        <h2 className="font-bold">Categories</h2>
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
+    <div className="mx-auto flex max-w-6xl items-start gap-6 px-4 py-8">
+      {/* Sidebar — sticky in scroll container so it stays visible while results scroll */}
+      <aside className="hidden w-56 shrink-0 md:sticky md:top-0 md:z-10 md:block md:max-h-[calc(100dvh-5.5rem)] md:overflow-y-auto md:rounded-xl md:border md:border-neutral-200 md:bg-white md:py-4 md:pl-3 md:pr-2 md:shadow-sm">
+        <h2 className="font-bold leading-tight">Categories</h2>
+        <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={!cat}
@@ -56,7 +56,7 @@ export function SearchPage() {
           All
         </label>
         {categories.map((c) => (
-          <label key={c.slug} className="flex items-center gap-2 text-sm cursor-pointer">
+          <label key={c.slug} className="mt-2 flex cursor-pointer items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={cat === c.slug}

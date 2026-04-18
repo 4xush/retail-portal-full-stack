@@ -55,7 +55,7 @@ export function PublicLayout() {
         </div>
       </header>
       <Breadcrumb />
-      <main className="min-h-0 flex-1 overflow-hidden">
+      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         <Outlet />
       </main>
       <CartDrawer />

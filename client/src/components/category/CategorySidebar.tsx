@@ -11,9 +11,9 @@ export function CategorySidebar({
   onSelect: (slug: string) => void;
 }) {
   return (
-    <aside className="hidden md:flex w-56 shrink-0 flex-col h-full overflow-y-auto border-r border-neutral-100 bg-white">
-      {/* Header */}
-      <div className="flex items-center gap-2 border-b border-neutral-100 px-4 py-4">
+    <aside className="hidden h-full min-h-0 w-56 shrink-0 flex-col border-r border-neutral-100 bg-white md:flex">
+      {/* Header — stays fixed; only the nav below scrolls if needed */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-neutral-100 px-4 py-4">
         <div className="flex items-end gap-0.5">
           <span className="h-5 w-1 rounded-sm bg-brand" />
           <span className="h-4 w-1 rounded-sm bg-brand" />
@@ -25,7 +25,7 @@ export function CategorySidebar({
       </div>
 
       {/* Category list */}
-      <nav className="flex-1 py-2">
+      <nav className="min-h-0 flex-1 overflow-y-auto py-2">
         {categories.map((c) => {
           const active = activeSlug === c.slug;
           return (
