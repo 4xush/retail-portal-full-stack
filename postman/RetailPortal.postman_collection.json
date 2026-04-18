@@ -1,15 +1,23 @@
 {
   "info": {
     "name": "RetailPortal",
+    "_postman_id": "retail-portal-v2",
+    "description": "Full test suite for the RetailPortal API.\n\n**Workflow**\n1. Run `Auth / Login Admin` → adminToken auto-set\n2. Run `Auth / Login User` → accessToken auto-set; apiKey auto-set\n3. Run any folder — tokens are injected automatically.\n\n**API Key auth**: pass `x-api-key: {{apiKey}}` header as an alternative to Bearer.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:5000" },
-    { "key": "accessToken", "value": "" },
-    { "key": "adminToken", "value": "" },
-    { "key": "apiKey", "value": "" }
+    { "key": "baseUrl",      "value": "http://localhost:5000" },
+    { "key": "accessToken",  "value": "" },
+    { "key": "adminToken",   "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "apiKey",       "value": "" },
+    { "key": "productId",    "value": "" },
+    { "key": "categoryId",   "value": "" },
+    { "key": "orderId",      "value": "" },
+    { "key": "discountId",   "value": "" }
   ],
   "item": [
+
     {
       "name": "Auth",
       "item": [
@@ -21,24 +29,21 @@
             "url": "{{baseUrl}}/api/auth/signup",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Postman User\",\n  \"email\": \"postman.user@demo.com\",\n  \"password\": \"secret123\"\n}"
+              "raw": "{\n  \"name\": \"Postman User\",\n  \"email\": \"postman.new@demo.com\",\n  \"password\": \"secret123\"\n}"
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('status 201', () => pm.response.code === 201);",
-                  "const j = pm.response.json();",
-                  "pm.test('success', () => j.success === true);",
-                  "if (j.data?.accessToken) pm.collectionVariables.set('accessToken', j.data.accessToken);",
-                  "if (j.data?.apiKey) pm.collectionVariables.set('apiKey', j.data.apiKey);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('accessToken present', () => pm.expect(j.data.accessToken).to.be.a('string'));",
+              "pm.test('apiKey present', () => pm.expect(j.data.apiKey).to.be.a('string'));",
+              "if (j.data?.accessToken) pm.collectionVariables.set('accessToken', j.data.accessToken);",
+              "if (j.data?.apiKey)       pm.collectionVariables.set('apiKey', j.data.apiKey);"
+            ]}
+          }]
         },
         {
           "name": "Login User",
@@ -51,20 +56,19 @@
               "raw": "{\n  \"email\": \"user@demo.com\",\n  \"password\": \"User@123\"\n}"
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('status 200', () => pm.response.code === 200);",
-                  "const j = pm.response.json();",
-                  "pm.test('success', () => j.success === true);",
-                  "if (j.data?.accessToken) pm.collectionVariables.set('accessToken', j.data.accessToken);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('accessToken present', () => pm.expect(j.data.accessToken).to.be.a('string'));",
+              "pm.test('apiKey present', () => pm.expect(j.data.apiKey).to.be.a('string'));",
+              "if (j.data?.accessToken)  pm.collectionVariables.set('accessToken', j.data.accessToken);",
+              "if (j.data?.refreshToken) pm.collectionVariables.set('refreshToken', j.data.refreshToken);",
+              "if (j.data?.apiKey)       pm.collectionVariables.set('apiKey', j.data.apiKey);"
+            ]}
+          }]
         },
         {
           "name": "Login Admin",
@@ -77,143 +81,570 @@
               "raw": "{\n  \"email\": \"admin@demo.com\",\n  \"password\": \"Admin@123\"\n}"
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('status 200', () => pm.response.code === 200);",
-                  "const j = pm.response.json();",
-                  "pm.test('success', () => j.success === true);",
-                  "if (j.data?.accessToken) pm.collectionVariables.set('adminToken', j.data.accessToken);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('role is admin', () => pm.expect(j.data.user.role).to.equal('admin'));",
+              "if (j.data?.accessToken)  pm.collectionVariables.set('adminToken', j.data.accessToken);",
+              "if (j.data?.refreshToken) pm.collectionVariables.set('refreshToken', j.data.refreshToken);"
+            ]}
+          }]
         },
         {
-          "name": "Refresh",
+          "name": "Refresh Token",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{baseUrl}}/api/auth/refresh",
-            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"REPLACE_ME\"\n}" }
-          }
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('new accessToken', () => pm.expect(j.data.accessToken).to.be.a('string'));",
+              "if (j.data?.accessToken) pm.collectionVariables.set('accessToken', j.data.accessToken);"
+            ]}
+          }]
         },
         {
           "name": "Logout",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
             "url": "{{baseUrl}}/api/auth/logout",
-            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"REPLACE_ME\"\n}" }
-          }
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('success flag', () => pm.expect(pm.response.json().success).to.be.true);"
+            ]}
+          }]
+        },
+        {
+          "name": "API Key Auth (x-api-key header)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-api-key", "value": "{{apiKey}}" }],
+            "url": "{{baseUrl}}/api/orders"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200 with API key', () => pm.response.to.have.status(200));",
+              "pm.test('success flag', () => pm.expect(pm.response.json().success).to.be.true);"
+            ]}
+          }]
         }
       ]
     },
+
     {
       "name": "Search",
       "item": [
         {
-          "name": "Suggest",
+          "name": "Autocomplete Suggest (prefix)",
           "request": { "method": "GET", "url": "{{baseUrl}}/api/search/suggest?q=bur" },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200', () => pm.response.code === 200);",
-                  "pm.test('success', () => pm.response.json().success === true);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('suggestions array', () => pm.expect(j.data.suggestions).to.be.an('array'));",
+              "pm.test('at least 1 suggestion', () => pm.expect(j.data.suggestions.length).to.be.above(0));"
+            ]}
+          }]
         },
         {
-          "name": "Full search",
+          "name": "Autocomplete Suggest (mid-word)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/search/suggest?q=rings" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('mid-word results', () => pm.expect(pm.response.json().data.suggestions.length).to.be.above(0));"
+            ]}
+          }]
+        },
+        {
+          "name": "Full Search (exact)",
           "request": { "method": "GET", "url": "{{baseUrl}}/api/search?q=burger&page=1&limit=20" },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200', () => pm.response.code === 200);",
-                  "const j = pm.response.json();",
-                  "pm.test('success', () => j.success === true);",
-                  "pm.test('data array', () => Array.isArray(j.data));"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('data is array', () => pm.expect(j.data).to.be.an('array'));",
+              "pm.test('has results', () => pm.expect(j.meta.total).to.be.above(0));",
+              "pm.test('text strategy', () => pm.expect(j.meta.strategy).to.equal('text'));",
+              "if (j.data[0]?._id) pm.collectionVariables.set('productId', j.data[0]._id);"
+            ]}
+          }]
+        },
+        {
+          "name": "Full Search (fuzzy / typo)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/search?q=burgr&page=1&limit=10" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('fuzzy still returns results', () => pm.expect(j.meta.total).to.be.above(0));",
+              "pm.test('fuzzy strategy used', () => pm.expect(j.meta.strategy).to.equal('fuzzy'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Full Search (category filter)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/search?q=meal&category=combos&limit=5" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('returns combos', () => pm.expect(pm.response.json().meta.total).to.be.above(0));"
+            ]}
+          }]
         }
       ]
     },
+
     {
       "name": "Categories",
       "item": [
         {
-          "name": "List",
+          "name": "List All",
           "request": { "method": "GET", "url": "{{baseUrl}}/api/categories" },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200', () => pm.response.code === 200);",
-                  "pm.test('success', () => pm.response.json().success === true);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('at least 1 category', () => pm.expect(j.data.length).to.be.above(0));",
+              "if (j.data[0]?._id) pm.collectionVariables.set('categoryId', j.data[0]._id);"
+            ]}
+          }]
+        },
+        {
+          "name": "Get by Slug",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/categories/burgers" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('category name', () => pm.expect(j.data.category.name).to.equal('Burgers'));",
+              "pm.test('products array', () => pm.expect(j.data.products).to.be.an('array'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/admin/categories",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Test Cat\",\n  \"slug\": \"postman-test-cat\",\n  \"description\": \"Created via Postman\"\n}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "pm.test('success flag', () => pm.expect(pm.response.json().success).to.be.true);"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/admin/categories/postman-test-cat",
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated via Postman\",\n  \"isActive\": true\n}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('success flag', () => pm.expect(pm.response.json().success).to.be.true);"
+            ]}
+          }]
         }
       ]
     },
+
     {
       "name": "Products",
       "item": [
         {
-          "name": "List",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/products?page=1&limit=8" }
+          "name": "List (paginated)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/products?page=1&limit=8" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('page meta', () => pm.expect(j.meta.page).to.equal(1));",
+              "pm.test('limit meta', () => pm.expect(j.meta.limit).to.equal(8));",
+              "if (j.data[0]?._id) pm.collectionVariables.set('productId', j.data[0]._id);"
+            ]}
+          }]
+        },
+        {
+          "name": "List (filtered by category slug)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/products?category=burgers&limit=5" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('returns items', () => pm.expect(pm.response.json().data.length).to.be.above(0));"
+            ]}
+          }]
+        },
+        {
+          "name": "Get by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/products/{{productId}}" },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('has title', () => pm.expect(j.data.title).to.be.a('string'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — Create Product (JSON body demo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/admin/products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Burger\",\n  \"description\": \"Test product from Postman\",\n  \"cost\": 149,\n  \"taxPercent\": 5,\n  \"category\": \"{{categoryId}}\",\n  \"stock\": 20,\n  \"tags\": [\"test\", \"postman\"]\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 201 or 200', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — Update Product Stock",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/admin/products/{{productId}}/stock",
+            "body": { "mode": "raw", "raw": "{\n  \"stock\": 42,\n  \"note\": \"Restocked via Postman test\"\n}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('stock updated', () => pm.expect(j.data.stock).to.equal(42));"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — Stock History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/stock-history?product={{productId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('array response', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+            ]}
+          }]
         }
       ]
     },
+
     {
       "name": "Orders",
       "item": [
         {
-          "name": "List (auth)",
+          "name": "Place Order (user)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"product\": \"{{productId}}\", \"qty\": 1, \"addOnIds\": [] }\n  ],\n  \"discountCode\": \"\",\n  \"address\": \"42, Test Street, Postman City\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('has orderId', () => pm.expect(j.data._id).to.be.a('string'));",
+              "if (j.data?._id) pm.collectionVariables.set('orderId', j.data._id);"
+            ]}
+          }]
+        },
+        {
+          "name": "Place Order with Discount (SAVE10)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"product\": \"{{productId}}\", \"qty\": 1, \"addOnIds\": [] }\n  ],\n  \"discountCode\": \"SAVE10\",\n  \"address\": \"42, Test Street, Postman City\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.test('discount applied', () => pm.expect(j.data.discountAmount).to.be.above(0));"
+            ]}
+          }]
+        },
+        {
+          "name": "List My Orders",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
             "url": "{{baseUrl}}/api/orders?page=1&limit=10"
-          }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('orders array', () => pm.expect(j.data).to.be.an('array'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/orders/{{orderId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('correct order', () => pm.expect(pm.response.json().data._id).to.equal(pm.collectionVariables.get('orderId')));"
+            ]}
+          }]
+        },
+        {
+          "name": "Reorder (repeat past order)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/orders/{{orderId}}/reorder"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "pm.test('new order created', () => pm.expect(pm.response.json().data._id).to.be.a('string'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — List All Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/orders?page=1&limit=20"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('orders array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Admin — Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{orderId}}/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"preparing\"\n}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('status updated', () => pm.expect(pm.response.json().data.status).to.equal('preparing'));"
+            ]}
+          }]
         }
       ]
     },
+
     {
       "name": "Admin",
       "item": [
         {
-          "name": "Dashboard",
+          "name": "Dashboard Stats",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
             "url": "{{baseUrl}}/api/admin/dashboard"
-          }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('success flag', () => pm.expect(j.success).to.be.true);",
+              "pm.test('totalOrders present', () => pm.expect(j.data).to.have.property('totalOrders'));",
+              "pm.test('totalUsers present', () => pm.expect(j.data).to.have.property('totalUsers'));",
+              "pm.test('revenue present', () => pm.expect(j.data).to.have.property('revenue'));"
+            ]}
+          }]
         },
         {
-          "name": "Discount codes",
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/users?page=1&limit=20"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('users array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Toggle User Active",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/users/{{userId}}/toggle-active"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));"
+            ]}
+          }]
+        },
+        {
+          "name": "Discount Codes — List",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
             "url": "{{baseUrl}}/api/admin/discount-codes"
-          }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('array', () => pm.expect(j.data).to.be.an('array'));",
+              "pm.test('at least 3 codes', () => pm.expect(j.data.length).to.be.gte(3));",
+              "if (j.data[0]?._id) pm.collectionVariables.set('discountId', j.data[0]._id);"
+            ]}
+          }]
+        },
+        {
+          "name": "Discount Codes — Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/admin/discount-codes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PMTEST\",\n  \"type\": \"percent\",\n  \"value\": 15,\n  \"minOrder\": 0,\n  \"usageLimit\": 100\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Created or conflict', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+            ]}
+          }]
+        },
+        {
+          "name": "Discount Codes — Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/discount-codes/{{discountId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Status 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));"
+            ]}
+          }]
+        },
+        {
+          "name": "Non-admin access — expect 403",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/admin/dashboard"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Non-admin gets 403', () => pm.response.to.have.status(403));"
+            ]}
+          }]
         }
       ]
     }
+
   ]
 }

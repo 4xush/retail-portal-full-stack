@@ -74,6 +74,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     user: publicUser(user),
     accessToken,
     refreshToken,
+    apiKey: user.apiKey,
   });
 }
 
