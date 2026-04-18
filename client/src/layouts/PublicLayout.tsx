@@ -11,8 +11,8 @@ export function PublicLayout() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-offwhite">
       <header className="shrink-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
-          <Link to="/" className="text-xl font-black tracking-tight text-brand">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
+          <Link to="/" className="shrink-0 text-xl font-black leading-none tracking-tight text-brand">
             Retail<span className="text-neutral-900">Portal</span>
           </Link>
           <SearchBar />
@@ -25,7 +25,7 @@ export function PublicLayout() {
                     Admin
                   </Link>
                 )}
-                <Link to="/orders" className="rounded-full px-3 py-1 text-sm font-medium text-neutral-700">
+                <Link to="/orders" className="rounded-full px-3 py-1 text-sm font-medium text-neutral-700 underline-offset-2 hover:underline">
                   Orders
                 </Link>
                 <button
@@ -40,7 +40,7 @@ export function PublicLayout() {
               </>
             ) : (
               <>
-                <Link to="/login" className="rounded-full px-3 py-1 text-sm font-medium">
+                <Link to="/login" className="rounded-full px-3 py-1 text-sm font-medium underline-offset-2 hover:underline">
                   Log in
                 </Link>
                 <Link
